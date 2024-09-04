@@ -109,11 +109,11 @@ export BUILD_ARCHITECTURE="$(arch)" # Determine architecture building on
 echo "Build architecture: $BUILD_ARCHITECTURE"
 
 case $BUILD_ARCHITECTURE in
-    armv6l|armv7l|aarch64)
-        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=OFF" # Disable SSE2 on ARM
+    x86|x86_64)
+        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=ON" # Disable SSE2 on ARM
         ;;
     *)
-        export FREERDP_OPTS_OVERRIDES=""
+        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=OFF"
         ;;
 esac
 
