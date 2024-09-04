@@ -22,9 +22,7 @@
 #
 
 # The Alpine Linux image that should be used as the basis for the guacd image
-# NOTE: Using 3.18 because the required openssl1.1-compat-dev package was
-# removed in more recent versions.
-ARG ALPINE_BASE_IMAGE=3.18
+ARG ALPINE_BASE_IMAGE=latest
 FROM alpine:${ALPINE_BASE_IMAGE} AS builder
 
 # FreeRDP version (default to version 3)
@@ -47,7 +45,6 @@ RUN apk add --no-cache                \
         libtool                       \
         libwebp-dev                   \
         make                          \
-        openssl1.1-compat-dev         \
         pango-dev                     \
         pulseaudio-dev                \
         sdl2-dev                      \
@@ -72,6 +69,7 @@ ARG PREFIX_DIR=/opt/guacamole
 # library (these can be overridden at build time if a specific version is
 # needed)
 #
+ARG WITH_OPENSSL='OpenSSL_1(\_\d+\w*)+'
 ARG WITH_FREERDP="${FREERDP_VERSION}(\.\d+)+"
 ARG WITH_LIBSSH2='libssh2-\d+(\.\d+)+'
 ARG WITH_LIBTELNET='\d+(\.\d+)+'
@@ -83,6 +81,8 @@ ARG WITH_LIBWEBSOCKETS='v\d+(\.\d+)+'
 # guacamole-server itself (these can be overridden at build time if different
 # options are needed)
 #
+
+ARG OPENSSL_OPTS=""
 
 ARG FREERDP_OPTS="\
     -DBUILTIN_CHANNELS=OFF \

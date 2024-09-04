@@ -28,7 +28,7 @@
 # Pre-populate build control variables such that the custom build prefix is
 # used for C headers, locating libraries, etc.
 export CFLAGS="-I${PREFIX_DIR}/include"
-export LDFLAGS="-L${PREFIX_DIR}/lib"
+export LDFLAGS="-Wl,-rpath,${PREFIX_DIR}/lib -L${PREFIX_DIR}/lib"
 export PKG_CONFIG_PATH="${PREFIX_DIR}/lib/pkgconfig" 
 
 # Ensure thread stack size will be 8 MB (glibc's default on Linux) rather than
@@ -92,6 +92,8 @@ install_from_git() {
         # Build and install
         cmake --build "${REPO_DIR}-build"
         cmake --install "${REPO_DIR}-build"
+    elif [ -e config ]; then
+        ./config --prefix="$PREFIX_DIR" "$@"
     else
         [ -e configure ] || autoreconf -fi
         ./configure --prefix="$PREFIX_DIR" "$@"
@@ -109,11 +111,11 @@ export BUILD_ARCHITECTURE="$(arch)" # Determine architecture building on
 echo "Build architecture: $BUILD_ARCHITECTURE"
 
 case $BUILD_ARCHITECTURE in
-    armv6l|armv7l|aarch64)
-        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=OFF" # Disable SSE2 on ARM
+    x86_64)
+        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=ON" # Enable SSE2 on x86_64
         ;;
     *)
-        export FREERDP_OPTS_OVERRIDES=""
+        export FREERDP_OPTS_OVERRIDES="-DWITH_SSE2=OFF"
         ;;
 esac
 
@@ -121,6 +123,7 @@ esac
 # Build and install core protocol library dependencies
 #
 
+install_from_git "https://github.com/openssl/openssl" "$WITH_OPENSSL" $OPENSSL_OPTS
 install_from_git "https://github.com/FreeRDP/FreeRDP" "$WITH_FREERDP" $FREERDP_OPTS $FREERDP_OPTS_OVERRIDES
 install_from_git "https://github.com/libssh2/libssh2" "$WITH_LIBSSH2" $LIBSSH2_OPTS
 install_from_git "https://github.com/seanmiddleditch/libtelnet" "$WITH_LIBTELNET" $LIBTELNET_OPTS
